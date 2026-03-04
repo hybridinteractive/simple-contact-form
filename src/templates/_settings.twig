@@ -1,0 +1,244 @@
+{% import "_includes/forms" as forms %}
+
+{% macro configWarning(setting) -%}
+  {% set setting = '<code>'~setting~'</code>' %}
+  {{ "This is being overridden by the {setting} config setting in your {file} config file."|t('simple-contact-form', {
+    setting: setting,
+    file: 'simple-contact-form.php'
+  })|raw }}
+{%- endmacro %}
+
+{% from _self import configWarning %}
+
+<div id="settings">
+  <h2>{{ "Basic Settings"|t('simple-contact-form') }}</h2>
+
+  {{ forms.autosuggestField({
+    first:        true,
+    label:        "To Email"|t('simple-contact-form'),
+    required:     true,
+    id:           'toEmail',
+    name:         'toEmail',
+    instructions: "The email address(es) that the contact form will send to. Separate multiple email addresses with commas."|t('simple-contact-form'),
+    value:        settings.toEmail,
+    suggestEnvVars: true,
+    autofocus:    true,
+    disabled:     'toEmail' in overrides,
+    warning:      'toEmail' in overrides ? configWarning('toEmail'),
+    errors:       settings.getErrors('toEmail')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Sender Text"|t('simple-contact-form'),
+    id:           'prependSender',
+    name:         'prependSender',
+    instructions: "Text that will be prepended to the email's From Name to inform who the Contact Form actually was sent by."|t('simple-contact-form'),
+    value:        (settings.prependSender ? settings.prependSender : ""),
+    suggestEnvVars: true,
+    disabled:     'prependSender' in overrides,
+    warning:      'prependSender' in overrides ? configWarning('prependSender'),
+    errors:       settings.getErrors('prependSender')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Subject Text"|t('simple-contact-form'),
+    id:           'prependSubject',
+    name:         'prependSubject',
+    instructions: "Text that will be prepended to the email's Subject to flag that it comes from the Contact Form."|t('simple-contact-form'),
+    value:        (settings.prependSubject ? settings.prependSubject : ""),
+    suggestEnvVars: true,
+    disabled:     'prependSubject' in overrides,
+    warning:      'prependSubject' in overrides ? configWarning('prependSubject'),
+    errors:       settings.getErrors('prependSubject')
+  }) }}
+
+  {{ forms.lightswitchField({
+    label:        "Allow attachments?"|t('simple-contact-form'),
+    id:           'allowAttachments',
+    name:         'allowAttachments',
+    on:           settings.allowAttachments,
+    disabled:     'allowAttachments' in overrides,
+    warning:      'allowAttachments' in overrides ? configWarning('allowAttachments'),
+    errors:       settings.getErrors('allowAttachments')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Success Flash Message"|t('simple-contact-form'),
+    id:           "successFlashMessage",
+    name:         "successFlashMessage",
+    instructions: "The flash message displayed after successfully sending a message."|t('simple-contact-form'),
+    value:        settings.successFlashMessage,
+    suggestEnvVars: true,
+    disabled:     'successFlashMessage' in overrides,
+    warning:      'successFlashMessage' in overrides ? configWarning('successFlashMessage'),
+    errors:       settings.getErrors('successFlashMessage')
+  }) }}
+</div>
+
+<div id="database" style="margin-top: 20px;">
+  <h2>{{ "Database Settings"|t('simple-contact-form') }}</h2>
+
+  {{ forms.lightswitchField({
+    label:        "Save submissions to database?"|t('simple-contact-form'),
+    id:           'enableDatabase',
+    name:         'enableDatabase',
+    on:           settings.enableDatabase,
+    instructions: "When enabled, all form submissions will be saved to the database and viewable in the Control Panel."|t('simple-contact-form'),
+    disabled:     'enableDatabase' in overrides,
+    warning:      'enableDatabase' in overrides ? configWarning('enableDatabase'),
+    errors:       settings.getErrors('enableDatabase')
+  }) }}
+
+  {{ forms.lightswitchField({
+    label:        "Capture spam submissions?"|t('simple-contact-form'),
+    id:           'enableSpamCapture',
+    name:         'enableSpamCapture',
+    on:           settings.enableSpamCapture ?? true,
+    instructions: "When enabled, submissions marked as spam will be saved to a separate table for review."|t('simple-contact-form'),
+    disabled:     'enableSpamCapture' in overrides,
+    warning:      'enableSpamCapture' in overrides ? configWarning('enableSpamCapture'),
+    errors:       settings.getErrors('enableSpamCapture')
+  }) }}
+</div>
+
+<div id="email" style="margin-top: 20px;">
+  <h2>{{ "Email Settings"|t('simple-contact-form') }}</h2>
+
+  {{ forms.lightswitchField({
+    label:        "Enable template overwrite?"|t('simple-contact-form'),
+    id:           'enableTemplateOverwrite',
+    name:         'enableTemplateOverwrite',
+    on:           (settings.enableTemplateOverwrite ? settings.enableTemplateOverwrite : false),
+    instructions: "When enabled, you can use custom email templates for notifications."|t('simple-contact-form'),
+    disabled:     'enableTemplateOverwrite' in overrides,
+    warning:      'enableTemplateOverwrite' in overrides ? configWarning('enableTemplateOverwrite'),
+    errors:       settings.getErrors('enableTemplateOverwrite')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Notification Template"|t('simple-contact-form'),
+    id:           'notificationTemplate',
+    name:         'notificationTemplate',
+    instructions: "The template to use for notification emails."|t('simple-contact-form'),
+    value:        (settings.notificationTemplate ? settings.notificationTemplate : ""),
+    suggestEnvVars: true,
+    disabled:     'notificationTemplate' in overrides,
+    warning:      'notificationTemplate' in overrides ? configWarning('notificationTemplate'),
+    errors:       settings.getErrors('notificationTemplate')
+  }) }}
+
+  {{ forms.lightswitchField({
+    label:        "Enable confirmation emails?"|t('simple-contact-form'),
+    id:           'enableConfirmationEmail',
+    name:         'enableConfirmationEmail',
+    on:           (settings.enableConfirmationEmail ? settings.enableConfirmationEmail : false),
+    instructions: "When enabled, a confirmation email will be sent to the person who submitted the form."|t('simple-contact-form'),
+    disabled:     'enableConfirmationEmail' in overrides,
+    warning:      'enableConfirmationEmail' in overrides ? configWarning('enableConfirmationEmail'),
+    errors:       settings.getErrors('enableConfirmationEmail')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Confirmation Template"|t('simple-contact-form'),
+    id:           'confirmationTemplate',
+    name:         'confirmationTemplate',
+    instructions: "The template to use for confirmation emails."|t('simple-contact-form'),
+    value:        settings.confirmationTemplate,
+    suggestEnvVars: true,
+    disabled:     'confirmationTemplate' in overrides,
+    warning:      'confirmationTemplate' in overrides ? configWarning('confirmationTemplate'),
+    errors:       settings.getErrors('confirmationTemplate')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Confirmation Subject"|t('simple-contact-form'),
+    id:           'confirmationSubject',
+    name:         'confirmationSubject',
+    instructions: "The subject line for confirmation emails."|t('simple-contact-form'),
+    value:        settings.confirmationSubject,
+    suggestEnvVars: true,
+    disabled:     'confirmationSubject' in overrides,
+    warning:      'confirmationSubject' in overrides ? configWarning('confirmationSubject'),
+    errors:       settings.getErrors('confirmationSubject')
+  }) }}
+</div>
+
+<div id="recaptcha" style="margin-top: 20px;">
+  <h2>{{ "reCAPTCHA Settings"|t('simple-contact-form') }}</h2>
+
+  {{ forms.lightswitchField({
+    label:        "Enable reCAPTCHA?"|t('simple-contact-form'),
+    id:           'recaptcha',
+    name:         'recaptcha',
+    on:           settings.recaptcha,
+    instructions: "When enabled, reCAPTCHA will be required for all form submissions."|t('simple-contact-form'),
+    disabled:     'recaptcha' in overrides,
+    warning:      'recaptcha' in overrides ? configWarning('recaptcha'),
+    errors:       settings.getErrors('recaptcha')
+  }) }}
+
+  {{ forms.selectField({
+    label:        "reCAPTCHA Version"|t('simple-contact-form'),
+    id:           'recaptchaVersion',
+    name:         'recaptchaVersion',
+    instructions: "Choose which version of reCAPTCHA to use."|t('simple-contact-form'),
+    value:        settings.recaptchaVersion,
+    options:      [
+      { value: '2', label: 'reCAPTCHA v2 (Invisible)' },
+      { value: '3', label: 'reCAPTCHA v3' }
+    ],
+    disabled:     'recaptcha' in overrides,
+    warning:      'recaptchaVersion' in overrides ? configWarning('recaptchaVersion'),
+    errors:       settings.getErrors('recaptchaVersion')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "reCAPTCHA Site Key"|t('simple-contact-form'),
+    id:           'recaptchaSiteKey',
+    name:         'recaptchaSiteKey',
+    instructions: "Your reCAPTCHA site key from Google."|t('simple-contact-form'),
+    value:        settings.recaptchaSiteKey,
+    suggestEnvVars: true,
+    disabled:     'recaptchaSiteKey' in overrides,
+    warning:      'recaptchaSiteKey' in overrides ? configWarning('recaptchaSiteKey'),
+    errors:       settings.getErrors('recaptchaSiteKey')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "reCAPTCHA Secret Key"|t('simple-contact-form'),
+    id:           'recaptchaSecretKey',
+    name:         'recaptchaSecretKey',
+    instructions: "Your reCAPTCHA secret key from Google."|t('simple-contact-form'),
+    value:        settings.recaptchaSecretKey,
+    suggestEnvVars: true,
+    disabled:     'recaptchaSecretKey' in overrides,
+    warning:      'recaptchaSecretKey' in overrides ? configWarning('recaptchaSecretKey'),
+    errors:       settings.getErrors('recaptchaSecretKey')
+  }) }}
+
+  {{ forms.textField({
+    label:        "reCAPTCHA Threshold (v3 only)"|t('simple-contact-form'),
+    id:           'recaptchaThreshold',
+    name:         'recaptchaThreshold',
+    instructions: "The minimum score required for reCAPTCHA v3 (0.0 to 1.0)."|t('simple-contact-form'),
+    value:        settings.recaptchaThreshold,
+    type:         'number',
+    step:         '0.1',
+    min:          '0',
+    max:          '1',
+    disabled:     'recaptchaThreshold' in overrides,
+    warning:      'recaptchaThreshold' in overrides ? configWarning('recaptchaThreshold'),
+    errors:       settings.getErrors('recaptchaThreshold')
+  }) }}
+
+  {{ forms.lightswitchField({
+    label:        "Hide reCAPTCHA Badge?"|t('simple-contact-form'),
+    id:           'recaptchaHideBadge',
+    name:         'recaptchaHideBadge',
+    on:           settings.recaptchaHideBadge,
+    instructions: "When enabled, the reCAPTCHA badge will be hidden."|t('simple-contact-form'),
+    disabled:     'recaptchaHideBadge' in overrides,
+    warning:      'recaptchaHideBadge' in overrides ? configWarning('recaptchaHideBadge'),
+    errors:       settings.getErrors('recaptchaHideBadge')
+  }) }}
+</div>

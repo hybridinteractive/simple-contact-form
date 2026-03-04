@@ -1,0 +1,65 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+{% set title = submission ? submission.dateCreated|date('d/m/Y H:i') : "" %}
+
+{% if crumbs is not defined %}
+    {% if submission %}
+        {% set crumbs = [
+            { label: craft.simpleContactForm.name, url: url('simple-contact-form') },
+            { label: submission.subject, url: '' }
+        ] %}
+
+    {% else %}
+        {% set crumbs = [
+            { label: craft.simpleContactForm.name, url: url('simple-contact-form') }
+        ] %}
+    {% endif %}
+{% endif %}
+
+{% block header %}
+    {{ block('pageTitle') }}
+{% endblock %}
+
+{% block content %}
+    <div class="readable">
+        {% if submission %}
+            <h3>{{ "Subject"|t('simple-contact-form') }}</h3>
+            <p>{{ submission.subject }}</p>
+            <h3>{{ "From name"|t('simple-contact-form') }}</h3>
+            <p>{{ submission.fromName }}</p>
+            <h3>{{ "From email"|t('simple-contact-form') }}</h3>
+            <p>{{ submission.fromEmail }}</p>
+            {% for key, value in messageObject %}
+                {% if key != "formName" and key != "toEmail" and key != "confirmationSubject" and key != "confirmationTemplate" and key != "notificationTemplate" and key != "disableRecaptcha" and key != "disableConfirmation" %}
+                    <h3>{{ key|capitalize|t('simple-contact-form') }}</h3>
+                    {% if value is iterable %}
+                        {% for item in value %}
+                            <p>{{ item|nl2br }}</p>
+                        {% endfor %}
+                    {% else %}
+                        <p>{{ value|nl2br }}</p>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <h3>Submission does not exist or was deleted</h3>
+        {% endif %}
+    </div>
+
+    <hr>
+    <a href="{{ url('simple-contact-form') }}" class="btn">{{ "Back to overview"|t('simple-contact-form') }}</a>
+{% endblock %}
+
+{% block details %}
+    {% if submission %}
+        <hr>
+        <div class="meta read-only">
+            <div class="data">
+                <h5 class="heading">{{ "Date Created"|t('app') }}</h5>
+                <div class="value">{{ submission.dateCreated|datetime('short') }}</div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,69 @@
+{
+  "name": "hybridinteractive/simple-contact-form",
+  "description": "Simple Contact Form plugin for Craft CMS with database storage, confirmation emails, template overrides, and reCAPTCHA support",
+  "version": "1.0.0",
+  "type": "craft-plugin",
+  "keywords": [
+    "cms",
+    "craftcms",
+    "contact",
+    "form",
+    "database",
+    "recaptcha",
+    "email",
+    "yii2"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Hybrid Interactive",
+      "homepage": "https://hybridinteractive.io"
+    }
+  ],
+  "support": {
+    "email": "support@craftcms.com",
+    "issues": "https://github.com/craftcms/contact-form/issues?state=open",
+    "source": "https://github.com/craftcms/contact-form",
+    "docs": "https://github.com/craftcms/contact-form",
+    "rss": "https://github.com/craftcms/contact-form/commits/3.x.atom"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.2",
+    "craftcms/cms": "^5.0.0"
+  },
+  "require-dev": {
+    "craftcms/ecs": "dev-main",
+    "craftcms/phpstan": "dev-main",
+    "craftcms/rector": "dev-main"
+  },
+  "autoload": {
+    "psr-4": {
+      "hybridinteractive\\SimpleContactForm\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "Simple Contact Form",
+    "handle": "simple-contact-form",
+    "documentationUrl": "https://github.com/craftcms/contact-form/blob/3.x/README.md",
+    "components": {
+      "simpleContactFormService": "hybridinteractive\\SimpleContactForm\\services\\SimpleContactFormService"
+    },
+    "class": "hybridinteractive\\SimpleContactForm\\Plugin"
+  },
+  "scripts": {
+    "check-cs": "ecs check --ansi",
+    "fix-cs": "ecs check --ansi --fix",
+    "phpstan": "phpstan --memory-limit=1G"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    },
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}

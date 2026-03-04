@@ -1,0 +1,13 @@
+includes:
+    - vendor/craftcms/phpstan/phpstan.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - src
+    excludePaths:
+        - src/../development/*
+    scanDirectories:
+        - vendor/craftcms/cms/src
+        - vendor/yiisoft/yii2
+

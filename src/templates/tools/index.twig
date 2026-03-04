@@ -1,0 +1,42 @@
+{% import "_includes/forms" as forms %}
+
+{% set selectedSubnavItem = 'tools' %}
+{% set title = "Tools" | t('simple-contact-form') %}
+
+{% set crumbs = [
+    { label: craft.simpleContactForm.name, url: url('simple-contact-form') },
+    { label: "Tools" | t('simple-contact-form'), url: url('simple-contact-form/tools') }
+] %}
+
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <div id="tools" class="readable">
+        <h2>{{ "Clear Submissions" | t('simple-contact-form') }}</h2>
+        <p class="light">{{ "Delete all submissions for a specific form. This action cannot be undone." | t('simple-contact-form') }}</p>
+
+        {% if formOptions | length %}
+            <form method="post" action="{{ actionUrl('simple-contact-form/tools/clear-submissions') }}" class="utility">
+                {{ csrfInput() }}
+                {{ actionInput('simple-contact-form/tools/clear-submissions') }}
+                {{ redirectInput('simple-contact-form/tools') }}
+
+                <div class="input ltr">
+                    {{ forms.selectField({
+                        label: "Form" | t('simple-contact-form'),
+                        id: 'formName',
+                        name: 'formName',
+                        options: formOptions,
+                        required: true,
+                    }) }}
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn submit delete icon" data-confirm="{{ "Are you sure you want to delete all submissions for this form? This cannot be undone." | t('simple-contact-form') }}">{{ "Clear submissions" | t('simple-contact-form') }}</button>
+                </div>
+            </form>
+        {% else %}
+            <p class="light">{{ "No form submissions found in the database." | t('simple-contact-form') }}</p>
+        {% endif %}
+    </div>
+{% endblock %}
