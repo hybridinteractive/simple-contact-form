@@ -24,7 +24,7 @@ A comprehensive contact form plugin for Craft CMS that combines the functionalit
 1. Copy this plugin to your `plugins/` directory
 2. Install via Composer:
    ```bash
-   composer require craftcms/simple-contact-form
+   composer require hybridinteractive/simple-contact-form
    ```
 3. Install the plugin in the Craft CMS Control Panel
 
@@ -161,3 +161,7 @@ MIT
 This plugin combines functionality from:
 - [Craft CMS Contact Form](https://github.com/craftcms/contact-form) by Pixel & Tonic
 - [Craft Contact Form Extensions](https://github.com/hybridinteractive/craft-contact-form-extensions) by Hybrid Interactive
+
+## Support
+
+If you find this plugin useful, consider [buying us a coffee](https://buymeacoffee.com/himp).
