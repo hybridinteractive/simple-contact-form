@@ -59,7 +59,7 @@ A comprehensive contact form plugin for Craft CMS that combines the functionalit
 ### Basic Form
 
 ```html
-<form method="post" action="">
+<form method="post" accept-charset="UTF-8">
     {{ csrfInput() }}
     {{ actionInput('simple-contact-form/send') }}
     
@@ -75,7 +75,7 @@ A comprehensive contact form plugin for Craft CMS that combines the functionalit
 ### With reCAPTCHA
 
 ```html
-<form method="post" action="">
+<form method="post" accept-charset="UTF-8">
     {{ csrfInput() }}
     {{ actionInput('simple-contact-form/send') }}
     
@@ -93,7 +93,7 @@ A comprehensive contact form plugin for Craft CMS that combines the functionalit
 ### With reCAPTCHA v3
 
 ```html
-<form method="post" action="">
+<form method="post" accept-charset="UTF-8">
     {{ csrfInput() }}
     {{ actionInput('simple-contact-form/send') }}
     
