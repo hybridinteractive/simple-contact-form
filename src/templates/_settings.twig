@@ -73,6 +73,43 @@
     warning:      'successFlashMessage' in overrides ? configWarning('successFlashMessage'),
     errors:       settings.getErrors('successFlashMessage')
   }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Allowed Message Fields"|t('simple-contact-form'),
+    id:           'allowedMessageFields',
+    name:         'allowedMessageFields',
+    instructions: "Comma-separated list of message sub-keys that can be posted to the form (besides body). Leave empty to allow all."|t('simple-contact-form'),
+    value:        settings.allowedMessageFields ? (settings.allowedMessageFields|join(', ')) : '',
+    suggestEnvVars: true,
+    disabled:     'allowedMessageFields' in overrides,
+    warning:      'allowedMessageFields' in overrides ? configWarning('allowedMessageFields'),
+    errors:       settings.getErrors('allowedMessageFields')
+  }) }}
+
+  {{ forms.textareaField({
+    label:        "Per-form overrides (JSON)"|t('simple-contact-form'),
+    id:           'formOverrides',
+    name:         'formOverrides',
+    rows:         14,
+    class:        'nicetext code',
+    instructions: "Secure replacement for posting override fields from the frontend. Keys are form handles matching message[formName] (default contact). Allowed properties per handle: toEmail, disableRecaptcha, disableSaveSubmission, disableConfirmation, notificationTemplate, confirmationTemplate, confirmationSubject."|t('simple-contact-form'),
+    value:        settings.formOverrides ? settings.formOverrides|json_encode(constant('JSON_PRETTY_PRINT')) : '',
+    disabled:     'formOverrides' in overrides,
+    warning:      'formOverrides' in overrides ? configWarning('formOverrides'),
+    errors:       settings.getErrors('formOverrides')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "Allowed public form handles"|t('simple-contact-form'),
+    id:           'allowedPublicFormNames',
+    name:         'allowedPublicFormNames',
+    instructions: "Optional comma-separated handles. When set, only those message[formName] values are accepted after normalization. Matches keys in Form overrides. Leave empty to allow any normalized handle."|t('simple-contact-form'),
+    value:        settings.allowedPublicFormNames ? settings.allowedPublicFormNames|join(', ') : '',
+    suggestEnvVars: true,
+    disabled:     'allowedPublicFormNames' in overrides,
+    warning:      'allowedPublicFormNames' in overrides ? configWarning('allowedPublicFormNames'),
+    errors:       settings.getErrors('allowedPublicFormNames')
+  }) }}
 </div>
 
 <div id="database" style="margin-top: 20px;">
@@ -177,6 +214,41 @@
     errors:       settings.getErrors('recaptcha')
   }) }}
 
+  {{ forms.lightswitchField({
+    label:        "Enable reCAPTCHA URL override?"|t('simple-contact-form'),
+    id:           'enableRecaptchaOverride',
+    name:         'enableRecaptchaOverride',
+    on:           settings.enableRecaptchaOverride,
+    instructions: "When enabled, you can specify custom reCAPTCHA API and verification URLs."|t('simple-contact-form'),
+    disabled:     'enableRecaptchaOverride' in overrides,
+    warning:      'enableRecaptchaOverride' in overrides ? configWarning('enableRecaptchaOverride'),
+    errors:       settings.getErrors('enableRecaptchaOverride')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "reCAPTCHA API URL"|t('simple-contact-form'),
+    id:           'recaptchaUrl',
+    name:         'recaptchaUrl',
+    instructions: "Custom URL for the reCAPTCHA JavaScript API."|t('simple-contact-form'),
+    value:        settings.recaptchaUrl,
+    suggestEnvVars: true,
+    disabled:     'recaptchaUrl' in overrides,
+    warning:      'recaptchaUrl' in overrides ? configWarning('recaptchaUrl'),
+    errors:       settings.getErrors('recaptchaUrl')
+  }) }}
+
+  {{ forms.autosuggestField({
+    label:        "reCAPTCHA Verification URL"|t('simple-contact-form'),
+    id:           'recaptchaVerificationUrl',
+    name:         'recaptchaVerificationUrl',
+    instructions: "Custom URL for reCAPTCHA server-side verification."|t('simple-contact-form'),
+    value:        settings.recaptchaVerificationUrl,
+    suggestEnvVars: true,
+    disabled:     'recaptchaVerificationUrl' in overrides,
+    warning:      'recaptchaVerificationUrl' in overrides ? configWarning('recaptchaVerificationUrl'),
+    errors:       settings.getErrors('recaptchaVerificationUrl')
+  }) }}
+
   {{ forms.selectField({
     label:        "reCAPTCHA Version"|t('simple-contact-form'),
     id:           'recaptchaVersion',
@@ -187,7 +259,7 @@
       { value: '2', label: 'reCAPTCHA v2 (Invisible)' },
       { value: '3', label: 'reCAPTCHA v3' }
     ],
-    disabled:     'recaptcha' in overrides,
+    disabled:     'recaptchaVersion' in overrides,
     warning:      'recaptchaVersion' in overrides ? configWarning('recaptchaVersion'),
     errors:       settings.getErrors('recaptchaVersion')
   }) }}
@@ -231,6 +303,30 @@
     errors:       settings.getErrors('recaptchaThreshold')
   }) }}
 
+  {{ forms.textField({
+    label:        "reCAPTCHA Badge Position (v2 only)"|t('simple-contact-form'),
+    id:           'recaptchaDataBadge',
+    name:         'recaptchaDataBadge',
+    instructions: "Position of the reCAPTCHA v2 badge: bottomright, bottomleft, or inline."|t('simple-contact-form'),
+    value:        settings.recaptchaDataBadge,
+    disabled:     'recaptchaDataBadge' in overrides,
+    warning:      'recaptchaDataBadge' in overrides ? configWarning('recaptchaDataBadge'),
+    errors:       settings.getErrors('recaptchaDataBadge')
+  }) }}
+
+  {{ forms.textField({
+    label:        "reCAPTCHA Timeout"|t('simple-contact-form'),
+    id:           'recaptchaTimeout',
+    name:         'recaptchaTimeout',
+    instructions: "Timeout in seconds for reCAPTCHA API requests."|t('simple-contact-form'),
+    value:        settings.recaptchaTimeout,
+    type:         'number',
+    min:          '1',
+    disabled:     'recaptchaTimeout' in overrides,
+    warning:      'recaptchaTimeout' in overrides ? configWarning('recaptchaTimeout'),
+    errors:       settings.getErrors('recaptchaTimeout')
+  }) }}
+
   {{ forms.lightswitchField({
     label:        "Hide reCAPTCHA Badge?"|t('simple-contact-form'),
     id:           'recaptchaHideBadge',
@@ -240,5 +336,16 @@
     disabled:     'recaptchaHideBadge' in overrides,
     warning:      'recaptchaHideBadge' in overrides ? configWarning('recaptchaHideBadge'),
     errors:       settings.getErrors('recaptchaHideBadge')
+  }) }}
+
+  {{ forms.lightswitchField({
+    label:        "reCAPTCHA Debug Mode?"|t('simple-contact-form'),
+    id:           'recaptchaDebug',
+    name:         'recaptchaDebug',
+    on:           settings.recaptchaDebug,
+    instructions: "When enabled, reCAPTCHA debug information will be logged."|t('simple-contact-form'),
+    disabled:     'recaptchaDebug' in overrides,
+    warning:      'recaptchaDebug' in overrides ? configWarning('recaptchaDebug'),
+    errors:       settings.getErrors('recaptchaDebug')
   }) }}
 </div>

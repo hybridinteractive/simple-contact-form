@@ -13,10 +13,11 @@ use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\db\ElementQueryInterface;
-use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use hybridinteractive\SimpleContactForm\Elements\Db\SubmissionQuery;
+use hybridinteractive\SimpleContactForm\Support\MessageSynopsis;
 use hybridinteractive\SimpleContactForm\exporters\FlatExporter;
+use yii\helpers\Html;
 
 class Submission extends Element
 {
@@ -208,29 +209,37 @@ class Submission extends Element
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
-    public function getTableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
-        if ($attribute == 'message') {
-            $message = (array) json_decode($this->message);
-            $html = '<ul>';
-            foreach ($message as $key => $value) {
-                if (is_string($value) && $key != 'formName' && $key != 'toEmail' && $key != 'confirmationSubject' && $key != 'confirmationTemplate' && $key != 'notificationTemplate' && $key != 'disableRecaptcha' && $key != 'disableConfirmation') {
-                    $shortened = trim(substr($value, 0, 30));
-                    $html .= "<li><em>{$key}</em>: {$shortened}...</li>";
-                }
-            }
-            $html .= '</ul>';
-
-            return StringHelper::convertToUtf8($html);
+        if ($attribute === 'message') {
+            return $this->messageIndexPreviewHtml();
         }
 
-        return '';
+        return parent::attributeHtml($attribute);
     }
 
     /**
-     * @inheritDoc
+     * Synopsis for the element index Message column (plain text, escaped).
+     */
+    private function messageIndexPreviewHtml(): string
+    {
+        $raw = $this->message;
+        if ($raw === null || $raw === '') {
+            return '';
+        }
+
+        $synopsis = MessageSynopsis::plain((string) $raw, 240);
+        if ($synopsis === '') {
+            return '';
+        }
+
+        return '<span class="break-word">'.Html::encode($synopsis).'</span>';
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected static function defineSortOptions(): array
     {

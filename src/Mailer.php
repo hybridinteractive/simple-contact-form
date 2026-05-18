@@ -95,7 +95,7 @@ class Mailer extends Component
                 }
 
                 $message->attach($attachment->tempName, [
-                    'fileName' => $attachment->name,
+                    'fileName' => basename($attachment->name),
                     'contentType' => FileHelper::getMimeType($attachment->tempName),
                 ]);
             }

@@ -1,9 +1,11 @@
 <?php
 
 /**
- * @link https://craftcms.com/
+ * @link https://hybridinteractive.io/
  *
  * @copyright Copyright (c) Pixel & Tonic, Inc.
+ * @copyright Copyright (c) Hybrid Interactive
+ * @author Hybrid Interactive
  * @license MIT
  */
 
@@ -22,6 +24,7 @@ use craft\mail\Message;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\View;
 use hybridinteractive\SimpleContactForm\Variables\SimpleContactFormVariable;
+use craft\helpers\StringHelper;
 use yii\base\Event;
 
 /**
@@ -171,13 +174,14 @@ class Plugin extends CraftPlugin
                 return;
             }
 
-            // Disable Recaptcha
-            $disableRecaptcha = false;
-            if (is_array($e->submission->message) && array_key_exists('disableRecaptcha', $e->submission->message)) {
-                $disableRecaptcha = filter_var($e->submission->message['disableRecaptcha'], FILTER_VALIDATE_BOOLEAN);
-            }
+            $simpleSettings = Plugin::getInstance()->settings;
+            $formHandle = Settings::resolveFormHandle($e->submission->message);
+            $formOverrides = $simpleSettings->getMergedFormOverridesForHandle($formHandle);
 
-            if (Plugin::getInstance()->settings->recaptcha && $disableRecaptcha != true) {
+            // Disable Recaptcha (server-defined only per formOverrides / config.php)
+            $disableRecaptcha = !empty($formOverrides['disableRecaptcha']);
+
+            if ($simpleSettings->recaptcha && $disableRecaptcha !== true) {
                 $recaptcha = Plugin::getInstance()->simpleContactFormService->getRecaptcha();
                 $captchaResponse = Craft::$app->request->getParam('g-recaptcha-response');
 
@@ -190,33 +194,27 @@ class Plugin extends CraftPlugin
             }
 
             // Disable Saving Submission to DB
-            $disableSaveSubmission = false;
-            if (is_array($e->submission->message) && array_key_exists('disableSaveSubmission', $e->submission->message)) {
-                $disableSaveSubmission = filter_var($e->submission->message['disableSaveSubmission'], FILTER_VALIDATE_BOOLEAN);
-            }
+            $disableSaveSubmission = !empty($formOverrides['disableSaveSubmission']);
 
             $submission = $e->submission;
-            if (Plugin::getInstance()->settings->enableDatabase && $disableSaveSubmission != true) {
+            if ($simpleSettings->enableDatabase && $disableSaveSubmission !== true) {
                 Plugin::getInstance()->simpleContactFormService->saveSubmission($submission);
             }
 
-            // Override toEmail setting
-            if (is_array($e->submission->message) && array_key_exists('toEmail', $e->submission->message)) {
-                $email = $e->submission->message['toEmail'];
-                $e->toEmails = explode(',', $email);
+            // Override toEmails from server-defined formOverrides
+            if (!empty($formOverrides['toEmail']) && is_string($formOverrides['toEmail'])) {
+                $e->toEmails = StringHelper::split($formOverrides['toEmail']);
             }
 
             // Notification Template and overrides
-            if (Plugin::getInstance()->settings->enableTemplateOverwrite) {
+            if ($simpleSettings->enableTemplateOverwrite) {
                 // First set the template mode to the Site templates
                 Craft::$app->view->setTemplateMode(View::TEMPLATE_MODE_SITE);
 
-                // Check if template is overridden in form
-                if (is_array($e->submission->message) && array_key_exists('notificationTemplate', $e->submission->message)) {
-                    $template = '_emails/'.$e->submission->message['notificationTemplate'];
+                if (!empty($formOverrides['notificationTemplate'])) {
+                    $template = '_emails/'.$formOverrides['notificationTemplate'];
                 } else {
-                    // Render the set template
-                    $template = App::parseEnv(Plugin::getInstance()->settings->notificationTemplate);
+                    $template = App::parseEnv($simpleSettings->notificationTemplate);
                 }
 
                 // Render the set template
@@ -237,24 +235,22 @@ class Plugin extends CraftPlugin
 
         // Capture After Send Event from Mailer
         Event::on(Mailer::class, Mailer::EVENT_AFTER_SEND, function (MessageSent $e) {
+            $simpleSettings = Plugin::getInstance()->settings;
+            $formHandle = Settings::resolveFormHandle($e->submission->message);
+            $formOverrides = $simpleSettings->getMergedFormOverridesForHandle($formHandle);
+
             // Disable confirmation
-            $disableConfirmation = false;
-            if (is_array($e->submission->message) && array_key_exists('disableConfirmation', $e->submission->message)) {
-                $disableConfirmation = filter_var($e->submission->message['disableConfirmation'], FILTER_VALIDATE_BOOLEAN);
-            }
+            $disableConfirmation = !empty($formOverrides['disableConfirmation']);
 
             // Confirmation Template and overrides
-            if (Plugin::getInstance()->settings->enableConfirmationEmail && $disableConfirmation != true) {
+            if ($simpleSettings->enableConfirmationEmail && $disableConfirmation !== true) {
                 // First set the template mode to the Site templates
                 Craft::$app->view->setTemplateMode(View::TEMPLATE_MODE_SITE);
 
-                // Check if template is overridden in form
-                $template = null;
-                if (is_array($e->submission->message) && array_key_exists('confirmationTemplate', $e->submission->message)) {
-                    $template = '_emails/'.$e->submission->message['confirmationTemplate'];
+                if (!empty($formOverrides['confirmationTemplate'])) {
+                    $template = '_emails/'.$formOverrides['confirmationTemplate'];
                 } else {
-                    // Render the set template
-                    $template = App::parseEnv(Plugin::getInstance()->settings->confirmationTemplate);
+                    $template = App::parseEnv($simpleSettings->confirmationTemplate);
                 }
 
                 $html = Craft::$app->view->renderTemplate(
@@ -273,12 +269,11 @@ class Plugin extends CraftPlugin
                 }
                 $message->setHtmlBody($html);
 
-                // Check for subject override
                 $confirmationSubject = null;
-                if (is_array($e->submission->message) && array_key_exists('confirmationSubject', $e->submission->message)) {
-                    $confirmationSubject = $e->submission->message['confirmationSubject'];
+                if (!empty($formOverrides['confirmationSubject']) && is_string($formOverrides['confirmationSubject'])) {
+                    $confirmationSubject = $formOverrides['confirmationSubject'];
                 } else {
-                    $confirmationSubject = App::parseEnv(Plugin::getInstance()->settings->getConfirmationSubject());
+                    $confirmationSubject = App::parseEnv($simpleSettings->getConfirmationSubject());
                 }
                 $message->setSubject($confirmationSubject);
 
