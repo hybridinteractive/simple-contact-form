@@ -300,9 +300,26 @@ class Plugin extends CraftPlugin
 
     private function _registerSiteRoutes(): void
     {
-        // Register site/action routes for form submission
-        Event::on(\craft\web\UrlManager::class, \craft\web\UrlManager::EVENT_REGISTER_SITE_URL_RULES, function (\craft\events\RegisterUrlRulesEvent $event) {
+        Event::on(\craft\web\UrlManager::class, \craft\web\UrlManager::EVENT_REGISTER_SITE_URL_RULES, function (\craft\events\RegisterUrlRulesEvent $event): void {
             $event->rules['actions/simple-contact-form/send'] = 'simple-contact-form/http/send/index';
+
+            $settings = $this->getSettings();
+            if (!$settings->enableLegacyContactFormRoutes) {
+                return;
+            }
+
+            if (Craft::$app->plugins->isPluginInstalled('contact-form')
+                && Craft::$app->plugins->isPluginEnabled('contact-form')
+            ) {
+                Craft::warning(
+                    Craft::t('simple-contact-form', '`enableLegacyContactFormRoutes` is true, but Contact Form (`contact-form`) is still enabled. The legacy `/actions/contact-form/send` route was not registered.'),
+                    __METHOD__,
+                );
+
+                return;
+            }
+
+            $event->rules['actions/contact-form/send'] = 'simple-contact-form/http/send/index';
         });
     }
 }

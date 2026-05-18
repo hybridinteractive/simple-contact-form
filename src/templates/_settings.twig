@@ -11,6 +11,9 @@
 {% from _self import configWarning %}
 
 <div id="settings">
+{% if settings.enableLegacyContactFormRoutes %}
+<p class="warning with-icon">{{ "Legacy routing is enabled: POSTs to `{url}` use Simple Contact Form. Disable or uninstall the official Contact Form plugin when using this setting."|t('simple-contact-form', { url: 'actions/contact-form/send' }) }}</p>
+{% endif %}
   <h2>{{ "Basic Settings"|t('simple-contact-form') }}</h2>
 
   {{ forms.autosuggestField({

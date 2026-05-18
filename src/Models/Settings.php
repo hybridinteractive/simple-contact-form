@@ -31,7 +31,7 @@ class Settings extends Model
     public ?string $successFlashMessage = null;
 
     /**
-     * @var string[]|null List of allowed `message` sub-keys that can be posted to `contact-form/send` (besides `body`).
+     * @var string[]|null List of allowed `message` sub-keys on the send action URL (besides `body`).
      *
      * @since 2.5.0
      */
@@ -51,6 +51,17 @@ class Settings extends Model
      * @var string[]|null
      */
     public ?array $allowedPublicFormNames = null;
+
+    /**
+     * When true, register `actions/contact-form/send` as an alias for Simple Contact Form's send action so
+     * templates that still use Contact Form URLs keep working during migration.
+     *
+     * Ignored (skipped with a Craft log warning) while the official `contact-form` plugin is enabled. Disable or
+     * uninstall Contact Form before relying on this alias.
+     *
+     * Recommended to set via `config/simple-contact-form.php`.
+     */
+    public bool $enableLegacyContactFormRoutes = false;
 
     /** @var bool Set when CP JSON textarea could not be decoded */
     private bool $_formOverridesJsonHadError = false;
@@ -328,6 +339,7 @@ class Settings extends Model
             'allowedMessageFields' => ['nullable', 'array'],
             ['formOverrides', 'validateFormOverrides'],
             ['allowedPublicFormNames', 'validateAllowedPublicFormNames'],
+            'enableLegacyContactFormRoutes' => ['boolean'],
 
             // Enhanced features rules
             'enableDatabase' => ['boolean'],

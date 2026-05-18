@@ -2,6 +2,8 @@
 
 A comprehensive contact form plugin for Craft CMS that combines the functionality of the official Contact Form plugin with enhanced features like database storage, confirmation emails, template overrides, and reCAPTCHA support.
 
+**Migrating from Contact Form / Contact Form Extensions?** See [MIGRATING.md](./MIGRATING.md).
+
 ## Features
 
 ### Core Contact Form Features

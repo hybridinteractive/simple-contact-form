@@ -98,4 +98,6 @@ return [
     'Unknown override key "{key}".' => 'Unknown override key "{key}".',
     'Each allowed form handle must use only letters, numbers, underscores, and hyphens.' => 'Each allowed form handle must use only letters, numbers, underscores, and hyphens.',
     'This form identifier is not allowed.' => 'This form identifier is not allowed.',
+    'Legacy routing is enabled: POSTs to `{url}` use Simple Contact Form. Disable or uninstall the official Contact Form plugin when using this setting.' => 'Legacy routing is enabled: POSTs to `{url}` use Simple Contact Form. Disable or uninstall the official Contact Form plugin when using this setting.',
+    '`enableLegacyContactFormRoutes` is true, but Contact Form (`contact-form`) is still enabled. The legacy `/actions/contact-form/send` route was not registered.' => '`enableLegacyContactFormRoutes` is true, but Contact Form (`contact-form`) is still enabled. The legacy `/actions/contact-form/send` route was not registered.',
 ];

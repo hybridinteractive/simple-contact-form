@@ -33,6 +33,9 @@ return [
     'recaptchaThreshold'      => .5,
     'recaptchaDebug'          => false,
 
+    // Migration alias for `actions/contact-form/send`; see MIGRATING.md. Default false.
+    'enableLegacyContactFormRoutes' => false,
+
     /*
      * Per-form overrides keyed by handle = message[formName] from the frontend.
      * Set only here or in CP (never from hidden POST fields).
