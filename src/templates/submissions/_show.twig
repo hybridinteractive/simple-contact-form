@@ -31,16 +31,18 @@
             <p>{{ submission.fromName }}</p>
             <h3>{{ "From email"|t('simple-contact-form') }}</h3>
             <p>{{ submission.fromEmail }}</p>
-            {% for key, value in messageObject %}
-                {% if key != "formName" and key != "toEmail" and key != "confirmationSubject" and key != "confirmationTemplate" and key != "notificationTemplate" and key != "disableRecaptcha" and key != "disableConfirmation" %}
-                    <h3>{{ key|capitalize|t('simple-contact-form') }}</h3>
-                    {% if value is iterable %}
-                        {% for item in value %}
-                            <p>{{ item|nl2br }}</p>
-                        {% endfor %}
-                    {% else %}
-                        <p>{{ value|nl2br }}</p>
-                    {% endif %}
+            {% if messageSynopsis and submissionMessageFields|length > 1 %}
+                <h3>{{ "Summary"|t('simple-contact-form') }}</h3>
+                <p class="light break-word">{{ messageSynopsis|e }}</p>
+            {% endif %}
+            {% for key, value in submissionMessageFields %}
+                <h3>{{ (key == 'body' ? 'Message'|t('simple-contact-form') : key|capitalize|t('simple-contact-form')) }}</h3>
+                {% if value is iterable %}
+                    {% for item in value %}
+                        <p>{{ item|e|nl2br }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>{{ value|e|nl2br }}</p>
                 {% endif %}
             {% endfor %}
         {% else %}

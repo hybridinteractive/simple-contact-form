@@ -11,6 +11,8 @@ namespace hybridinteractive\SimpleContactForm\Models;
 
 use Craft;
 use craft\base\Model;
+use craft\helpers\Json;
+use hybridinteractive\SimpleContactForm\Support\FormOverrides;
 
 class Settings extends Model
 {
@@ -34,6 +36,59 @@ class Settings extends Model
      * @since 2.5.0
      */
     public ?array $allowedMessageFields = null;
+
+    /**
+     * Per-form overrides keyed by handle matching `message[formName]` (default `contact`).
+     * Defined only via CP JSON field or config/simple-contact-form.php — never trusted from POST.
+     *
+     * @var array<string, array<mixed>>|null
+     */
+    public ?array $formOverrides = null;
+
+    /**
+     * When non-empty, `message[formName]` must be one of these handles (after normalization).
+     *
+     * @var string[]|null
+     */
+    public ?array $allowedPublicFormNames = null;
+
+    /** @var bool Set when CP JSON textarea could not be decoded */
+    private bool $_formOverridesJsonHadError = false;
+
+    /**
+     * @inheritdoc
+     */
+    public function setAttributes($values, $safeOnly = true): void
+    {
+        $this->_formOverridesJsonHadError = false;
+
+        if (isset($values['allowedMessageFields']) && is_string($values['allowedMessageFields'])) {
+            $values['allowedMessageFields'] = array_filter(array_map('trim', explode(',', $values['allowedMessageFields']))) ?: null;
+        }
+        if (isset($values['allowedPublicFormNames'])) {
+            if (is_string($values['allowedPublicFormNames'])) {
+                $values['allowedPublicFormNames'] = array_values(array_filter(array_map('trim', explode(',', $values['allowedPublicFormNames'])))) ?: null;
+            } elseif ($values['allowedPublicFormNames'] === '') {
+                $values['allowedPublicFormNames'] = null;
+            }
+        }
+        if (isset($values['formOverrides'])) {
+            if (is_string($values['formOverrides'])) {
+                $trimmed = trim($values['formOverrides']);
+                if ($trimmed === '') {
+                    $values['formOverrides'] = null;
+                } else {
+                    try {
+                        $values['formOverrides'] = Json::decode($trimmed);
+                    } catch (\Throwable $e) {
+                        $values['formOverrides'] = null;
+                        $this->_formOverridesJsonHadError = true;
+                    }
+                }
+            }
+        }
+        parent::setAttributes($values, $safeOnly);
+    }
 
     // Enhanced Features Settings
     /**
@@ -175,6 +230,90 @@ class Settings extends Model
     }
 
     /**
+     * Returns sanitized overrides for a form handle, or empty array.
+     *
+     * @return array<string, mixed>
+     */
+    public function getMergedFormOverridesForHandle(string $formHandle): array
+    {
+        $map = $this->formOverrides ?? [];
+        $row = $map[$formHandle] ?? [];
+        if (!is_array($row)) {
+            return [];
+        }
+
+        return FormOverrides::sanitizeRow($row);
+    }
+
+    /**
+     * @param  mixed  $message  Submission message (array|string|null)
+     */
+    public static function resolveFormHandle(mixed $message): string
+    {
+        $default = 'contact';
+        if (!is_array($message) || !isset($message['formName'])) {
+            return $default;
+        }
+        $handle = trim((string) $message['formName']);
+        if ($handle !== '' && preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $handle)) {
+            return $handle;
+        }
+
+        return $default;
+    }
+
+    /**
+     * Validates formOverrides shape (CP JSON textarea or config.php).
+     *
+     * @param mixed $_params
+     * @param mixed $_validator
+     * @param mixed $_current
+     */
+    public function validateFormOverrides(string $attribute, mixed $_params = null, mixed $_validator = null, mixed $_current = null): void
+    {
+        if ($this->_formOverridesJsonHadError) {
+            $this->addError($attribute, Craft::t('simple-contact-form', 'Form overrides must be valid JSON.'));
+            return;
+        }
+
+        if ($this->formOverrides === null || $this->formOverrides === []) {
+            return;
+        }
+
+        foreach ($this->formOverrides as $handle => $row) {
+            if (!is_string($handle) || !preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $handle)) {
+                $this->addError($attribute, Craft::t('simple-contact-form', 'Each form override key must be a handle (letters, numbers, underscores, hyphens).'));
+                return;
+            }
+            if (!is_array($row)) {
+                $this->addError($attribute, Craft::t('simple-contact-form', 'Overrides for "{handle}" must be a JSON object.', ['handle' => $handle]));
+                return;
+            }
+            foreach ($row as $k => $_) {
+                if (!in_array($k, FormOverrides::OVERRIDE_KEYS, true)) {
+                    $this->addError($attribute, Craft::t('simple-contact-form', 'Unknown override key "{key}".', ['key' => (string) $k]));
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * @param mixed $_params
+     * @param mixed $_validator
+     * @param mixed $_current
+     */
+    public function validateAllowedPublicFormNames(string $attribute, mixed $_params = null, mixed $_validator = null, mixed $_current = null): void
+    {
+        foreach ($this->allowedPublicFormNames ?? [] as $handle) {
+            if (!is_string($handle) || !preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $handle)) {
+                $this->addError($attribute, Craft::t('simple-contact-form', 'Each allowed form handle must use only letters, numbers, underscores, and hyphens.'));
+                return;
+            }
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function getRules(): array
@@ -187,6 +326,8 @@ class Settings extends Model
             'prependSubject' => ['nullable', 'string'],
             'allowAttachments' => ['boolean'],
             'allowedMessageFields' => ['nullable', 'array'],
+            ['formOverrides', 'validateFormOverrides'],
+            ['allowedPublicFormNames', 'validateAllowedPublicFormNames'],
 
             // Enhanced features rules
             'enableDatabase' => ['boolean'],

@@ -63,6 +63,13 @@ class ToolsController extends Controller
             return $this->redirectToPostedUrl();
         }
 
+        $allowedFormNames = array_merge(['all'], $this->getFormNames());
+        if (!in_array($formName, $allowedFormNames, true)) {
+            Craft::$app->getSession()->setError(Craft::t('simple-contact-form', 'Invalid form selected'));
+
+            return $this->redirectToPostedUrl();
+        }
+
         $query = Submission::find();
         if ($formName !== 'all') {
             $query->form($formName);
